@@ -6,23 +6,21 @@
 #include "esp_timer.h"
 
 #include "hw.h"
-#include "lcd.h"
-#include "cursor.h"
-#include "sound.h"
 #include "pin.h"
+#include "lcd.h"
+#include "nav.h"
+#if MILESTONE == 2
+#include "com.h"
+#endif // MILESTONE
+#include "graphics.h"
 #include "game.h"
 #include "config.h"
 
-// sound support
-#include "missileLaunch.h"
-
-static const char *TAG = "lab06";
+static const char *TAG = "lab05";
 
 // The update period as an integer in ms
 #define PER_MS ((uint32_t)(CONFIG_GAME_TIMER_PERIOD*1000))
 #define TIME_OUT 500 // ms
-
-#define CURSOR_SZ 7 // Cursor size (width & height) in pixels
 
 #define CHK_RET(x) ({                                           \
         int32_t ret_val = (x);                                  \
@@ -45,14 +43,6 @@ void update() {
 	isr_triggered_count++;
 }
 
-// Draw the cursor on the screen
-void cursor(coord_t x, coord_t y, color_t color)
-{
-	coord_t s2 = CURSOR_SZ >> 1; // size div 2
-	lcd_drawHLine(x-s2, y,    CURSOR_SZ, color);
-	lcd_drawVLine(x,    y-s2, CURSOR_SZ, color);
-}
-
 // Main application
 void app_main(void)
 {
@@ -63,10 +53,11 @@ void app_main(void)
 
 	// Initialization
 	lcd_init();
-	lcd_frameEnable();
-	lcd_fillScreen(CONFIG_COLOR_BACKGROUND);
-	CHK_RET(cursor_init(PER_MS));
-	sound_init(MISSILELAUNCH_SAMPLE_RATE);
+	lcd_fillScreen(CONFIG_BACK_CLR);
+	CHK_RET(nav_init(PER_MS));
+#if MILESTONE == 2
+	com_init();
+#endif // MILESTONE
 	game_init();
 
 	// Configure I/O pins for buttons
@@ -102,7 +93,7 @@ void app_main(void)
 
 	// Main game loop
 	uint64_t t1, t2, tmax = 0; // For hardware timer values
-	coord_t x, y; // For cursor position
+	int8_t r, c; // For navigator location
 	while (pin_get_level(HW_BTN_MENU)) // while MENU button not pressed
 	{
 		while (!interrupt_flag) ;
@@ -110,25 +101,18 @@ void app_main(void)
 		interrupt_flag = false;
 		isr_handled_count++;
 
-#ifndef CONFIG_ERASE
-		lcd_fillScreen(CONFIG_COLOR_BACKGROUND);
-#endif // CONFIG_ERASE
 		game_tick();
-		cursor_tick();
-		cursor_get_pos(&x, &y);
-#ifdef CONFIG_ERASE
-		static coord_t lx = -1, ly = -1;
-		if (x != lx || y != ly) {
-			cursor(lx,  ly, CONFIG_COLOR_BACKGROUND);
-			lx = x; ly = y;
+		nav_tick();
+		nav_get_loc(&r, &c);
+		static int8_t lr = -1, lc = -1;
+		if (r != lr || c != lc) {
+			graphics_drawHighlight(lr,  lc, CONFIG_BACK_CLR);
+			lr = r; lc = c;
 		}
-#endif // CONFIG_ERASE
-		cursor(x, y, CONFIG_COLOR_CURSOR);
-		lcd_writeFrame();
+		graphics_drawHighlight(r, c, CONFIG_HIGH_CLR);
 		t2 = esp_timer_get_time() - t1;
 		if (t2 > tmax) tmax = t2;
 	}
 	printf("Handled %lu of %lu interrupts\n", isr_handled_count, isr_triggered_count);
 	printf("WCET us:%llu\n", tmax);
-	sound_deinit();
 }
