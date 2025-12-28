@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "author": "Preston Manwaring",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-s3-devkitc-1",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": { "builder": "esp-idf" }
+    },
+    {
+      "type": "wokwi-led-bar-graph",
+      "id": "bargraph1",
+      "top": 100.8,
+      "left": 206.4,
+      "attrs": { "color": "lime" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 121.4,
+      "left": -134.4,
+      "attrs": { "color": "green" }
+    },
+    { "type": "wokwi-led", "id": "led1", "top": 169.2, "left": -121, "attrs": { "color": "red" } },
+    {
+      "type": "wokwi-logic-analyzer",
+      "id": "logic1",
+      "top": 288.35,
+      "left": -28.8,
+      "attrs": { "channelNames": "Button, LED" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "bargraph1:C1", "esp:GND.2", "black", [ "v0" ] ],
+    [ "bargraph1:C2", "bargraph1:C1", "green", [ "h0" ] ],
+    [ "bargraph1:C3", "bargraph1:C2", "green", [ "h0" ] ],
+    [ "bargraph1:C4", "bargraph1:C3", "green", [ "h0" ] ],
+    [ "bargraph1:C5", "bargraph1:C4", "green", [ "h0" ] ],
+    [ "bargraph1:C6", "bargraph1:C5", "green", [ "h0" ] ],
+    [ "bargraph1:C7", "bargraph1:C6", "green", [ "h0" ] ],
+    [ "bargraph1:C8", "bargraph1:C7", "green", [ "h0" ] ],
+    [ "bargraph1:C9", "bargraph1:C8", "green", [ "h0" ] ],
+    [ "bargraph1:C10", "bargraph1:C9", "green", [ "h0" ] ],
+    [ "esp:1", "bargraph1:A1", "green", [ "h100.57", "v47.82" ] ],
+    [ "esp:2", "bargraph1:A2", "green", [ "h90.97", "v47.82" ] ],
+    [ "esp:42", "bargraph1:A3", "green", [ "h81.37", "v47.82" ] ],
+    [ "esp:41", "bargraph1:A4", "green", [ "h71.77", "v47.82" ] ],
+    [ "esp:40", "bargraph1:A5", "green", [ "h62.17", "v47.83" ] ],
+    [ "esp:39", "bargraph1:A6", "green", [ "h52.57", "v47.82" ] ],
+    [ "esp:38", "bargraph1:A7", "green", [ "h42.97", "v47.82" ] ],
+    [ "esp:37", "bargraph1:A8", "green", [ "h33.37", "v47.82" ] ],
+    [ "esp:36", "bargraph1:A9", "green", [ "h23.77", "v47.82" ] ],
+    [ "esp:35", "bargraph1:A10", "green", [ "h14.17", "v47.82" ] ],
+    [ "btn1:1.l", "esp:3V3.2", "green", [ "h-28.8", "v-105.6" ] ],
+    [ "btn1:2.r", "esp:11", "green", [ "h38.6", "v29" ] ],
+    [ "led1:A", "esp:14", "green", [ "v9.6", "h57.6", "v-9.6" ] ],
+    [ "led1:C", "esp:GND.1", "black", [ "v0" ] ],
+    [ "logic1:GND", "esp:GND.1", "black", [ "h-76.8", "v-144", "h57.6" ] ],
+    [ "logic1:D0", "btn1:2.r", "gold", [ "h-19.2", "v-144" ] ],
+    [ "logic1:D1", "led1:A", "red", [ "h0" ] ]
+  ],
+  "dependencies": {}
+}
